@@ -58,12 +58,39 @@ class Snake {
         this.direction.applyAxisAngle(this.leftRight, -Math.PI/2)
         this.normal.applyAxisAngle(this.leftRight, -Math.PI/2)
     }
+    wrapPosition(pos) {
+        if (pos.x < -offset_x) {
+            pos.x = GRID_DIMENSIONS.x - offset_x - 1
+        }
+        if (pos.y < -offset_y) {
+            pos.y = GRID_DIMENSIONS.y - offset_y - 1
+        }
+        if (pos.z < -offset_z) {
+            pos.z = GRID_DIMENSIONS.z - offset_z - 1
+        }
+
+        if (pos.x >= GRID_DIMENSIONS.x - offset_x) {
+            pos.x = -offset_x
+        }
+        if (pos.y >= GRID_DIMENSIONS.y - offset_y) {
+            pos.y = -offset_y
+        }
+        if (pos.z >= GRID_DIMENSIONS.z - offset_z) {
+            pos.z = -offset_z
+        }
+        return pos
+    }
     move() {
         const { x, y, z } = this.getHead();
         const dx = this.direction.x;
         const dy = this.direction.y;
         const dz = this.direction.z;
-        const newPart = { x:Math.round(x+dx), y:Math.round(y+dy), z:Math.round(z+dz) }
+        const newPart = this.wrapPosition({ 
+            x:Math.round(x+dx),
+            y:Math.round(y+dy),
+            z:Math.round(z+dz)
+        })
+
         this.body.push(newPart);
         if (this.body.length > this.length) {
             this.body.splice(0, 1);

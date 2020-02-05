@@ -3,6 +3,10 @@ const GRID_DIMENSIONS = {
     y: 7,
     z: 7
 };
+// grid offset to center grid at origin
+const offset_x = Math.floor(GRID_DIMENSIONS.x / 2)
+const offset_y = Math.floor(GRID_DIMENSIONS.y / 2)
+const offset_z = Math.floor(GRID_DIMENSIONS.z / 2)
 
 var scene = new THREE.Scene();
 var camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -20,9 +24,6 @@ window.addEventListener('resize', function() {
 });
 
 function makeGrid() {
-    offset_x = Math.floor(GRID_DIMENSIONS.x / 2)
-    offset_y = Math.floor(GRID_DIMENSIONS.y / 2)
-    offset_z = Math.floor(GRID_DIMENSIONS.z / 2)
     for (let i = 0 ; i< GRID_DIMENSIONS.x; i++) {
         for (let j = 0; j < GRID_DIMENSIONS.y; j++) {
             for (let k = 0; k < GRID_DIMENSIONS.z; k++) {
