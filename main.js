@@ -48,12 +48,14 @@ const rotationMatrix = new THREE.Matrix4();
 rotationMatrix.makeRotationY(Math.PI/512)
 
 const snake = new Snake(0,0,0);
+snake.registerKeybindings();
 scene.add(snake.group)
 
 // game logic
 var update = function() {
+    const head = snake.getHead()
     camera.position.applyMatrix4(rotationMatrix);
-    camera.lookAt(0,0,0);
+    camera.lookAt(head.x, head.y, head.z);
     snake.update();
 };
 

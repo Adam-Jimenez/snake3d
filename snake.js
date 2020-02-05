@@ -2,7 +2,9 @@ const SNAKE_MOVE_DELAY = 1000; // milis
 
 class Snake {
     constructor(x,y,z, length=3) {
-        this.direction = { x: 1, y: 0, z: 0 }
+        this.direction = new THREE.Vector3( 1, 0, 0 );
+        this.normal = new THREE.Vector3(0, 1, 0);
+        this.leftRight = new THREE.Vector3(0, 0, 1);
         this.body = []
         this.body.push({ x, y, z })
         this.lastUpdate = new Date().getTime();
@@ -12,6 +14,41 @@ class Snake {
     }
     getHead() {
         return this.body[this.body.length-1]
+    }
+    getTail() {
+        return this.body[0]
+    }
+    registerKeybindings() {
+        document.addEventListener('keyup', (e) => {
+            if (e.code === "ArrowUp") {
+                this.rotateUp();
+            }        
+            else if (e.code === "ArrowDown") {
+                this.rotateDown();
+            }
+            else if (e.code === "ArrowLeft") {
+                this.rotateLeft();
+            }
+            else if (e.code === "ArrowRight") {
+                this.rotateRight();
+            }
+        });
+    }
+    rotateLeft() {
+        this.direction.applyAxisAngle(this.normal, Math.PI/2)
+        this.leftRight.applyAxisAngle(this.normal, Math.PI/2)
+    }
+    rotateRight() {
+        this.direction.applyAxisAngle(this.normal, -Math.PI/2)
+        this.leftRight.applyAxisAngle(this.normal, -Math.PI/2)
+    }
+    rotateUp() {
+        this.direction.applyAxisAngle(this.leftRight, Math.PI/2)
+        this.normal.applyAxisAngle(this.leftRight, Math.PI/2)
+    }
+    rotateDown() {
+        this.direction.applyAxisAngle(this.leftRight, -Math.PI/2)
+        this.normal.applyAxisAngle(this.leftRight, -Math.PI/2)
     }
     move() {
         const { x, y, z } = this.getHead();
@@ -29,20 +66,25 @@ class Snake {
             this.lastUpdate = now
             this.move();
             this.refreshGroup()
-            console.log(this.body)
         }
     }
     refreshGroup() {
-            // clear object group
-            for (let i = 0; i < this.group.children.length; i++) {
-                this.group.remove(this.group.children[i])
-            }
-            // recreate body parts
-            for (let i = 0; i < this.body.length; i++) {
-                const { x, y, z } = this.body[i]
-                const bodyPart = this.makeBodyPart(x, y, z)
-                this.group.add(bodyPart)
-            }
+        // clear object group
+        for (let i = this.group.children.length-1; i >= 0; i--) {
+            this.group.remove(this.group.children[i])
+        }
+        // recreate body parts
+        for (let i = 0; i < this.body.length; i++) {
+            const { x, y, z } = this.body[i]
+            const bodyPart = this.makeBodyPart(x, y, z)
+            this.group.add(bodyPart)
+        }
+        const direction = new THREE.ArrowHelper( this.direction, this.getHead(), 2, 0xFF0000);
+        const normal = new THREE.ArrowHelper( this.normal, this.getHead(), 2, 0x00FF00);
+        const leftRight = new THREE.ArrowHelper( this.leftRight, this.getHead(), 2, 0x0000FF);
+        this.group.add(direction);
+        this.group.add(normal);
+        this.group.add(leftRight);
     }
 
     makeBodyPart(x,y,z) {
