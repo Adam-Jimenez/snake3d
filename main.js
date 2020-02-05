@@ -47,7 +47,7 @@ const rotateAxis = new THREE.Vector3(0, 1, 0);
 const rotationMatrix = new THREE.Matrix4();
 rotationMatrix.makeRotationY(Math.PI/512)
 
-const snake = new Snake(0,0,0);
+const snake = new Snake(0,0,0, 5);
 snake.registerKeybindings();
 scene.add(snake.group)
 
@@ -68,7 +68,9 @@ var render = function() {
 var GameLoop = function() {
     update();
     render();
-    requestAnimationFrame(GameLoop);
+    if (snake.state == "ALIVE") {
+        requestAnimationFrame(GameLoop);
+    }
 };
 
 GameLoop();

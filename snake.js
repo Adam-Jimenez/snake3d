@@ -1,7 +1,13 @@
 const SNAKE_MOVE_DELAY = 1000; // milis
 
+const states = {
+    ALIVE: "ALIVE",
+    DEAD: "DEAD"
+}
+
 class Snake {
     constructor(x,y,z, length=3) {
+        this.state = states.ALIVE
         this.direction = new THREE.Vector3( 1, 0, 0 );
         this.normal = new THREE.Vector3(0, 1, 0);
         this.leftRight = new THREE.Vector3(0, 0, 1);
@@ -12,6 +18,7 @@ class Snake {
         this.refreshGroup();
         this.length = length;
         this.queueRotationFunction = () => {}
+
     }
     getHead() {
         return this.body[this.body.length-1]
@@ -56,9 +63,17 @@ class Snake {
         const dx = this.direction.x;
         const dy = this.direction.y;
         const dz = this.direction.z;
-        this.body.push({ x:x+dx, y:y+dy, z:z+dz });
+        const newPart = { x:Math.round(x+dx), y:Math.round(y+dy), z:Math.round(z+dz) }
+        this.body.push(newPart);
         if (this.body.length > this.length) {
             this.body.splice(0, 1);
+        }
+        for (let i = 0; i<this.body.length-1; i++) {
+            const part = this.body[i]
+            if (part.x == newPart.x && part.y == newPart.y && part.z == newPart.z) {
+                this.state = states.DEAD;
+                break;
+            }
         }
     }
     update() {
@@ -91,8 +106,9 @@ class Snake {
     }
 
     makeBodyPart(x,y,z) {
+        const color = this.state == states.ALIVE ? 0x00FF00 : 0xFF0000
         const geometry = new THREE.BoxGeometry(1, 1, 1);
-        const material = new THREE.MeshBasicMaterial({ color: 0x00FF00, transparent: true, opacity: 0.5});
+        const material = new THREE.MeshBasicMaterial({ color: color, transparent: true, opacity: 0.5});
         const mesh = new THREE.Mesh(geometry, material);
         mesh.position.set(x,y,z);
         return mesh
