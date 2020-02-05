@@ -11,6 +11,7 @@ class Snake {
         this.group = new THREE.Object3D();
         this.refreshGroup();
         this.length = length;
+        this.queueRotationFunction = () => {}
     }
     getHead() {
         return this.body[this.body.length-1]
@@ -21,16 +22,16 @@ class Snake {
     registerKeybindings() {
         document.addEventListener('keyup', (e) => {
             if (e.code === "ArrowUp") {
-                this.rotateUp();
+                this.queueRotationFunction = this.rotateUp
             }        
             else if (e.code === "ArrowDown") {
-                this.rotateDown();
+                this.queueRotationFunction = this.rotateDown
             }
             else if (e.code === "ArrowLeft") {
-                this.rotateLeft();
+                this.queueRotationFunction = this.rotateLeft
             }
             else if (e.code === "ArrowRight") {
-                this.rotateRight();
+                this.queueRotationFunction = this.rotateRight
             }
         });
     }
@@ -64,6 +65,8 @@ class Snake {
         const now = new Date().getTime() 
         if (now - this.lastUpdate >= SNAKE_MOVE_DELAY) {
             this.lastUpdate = now
+            this.queueRotationFunction()
+            this.queueRotationFunction = () => {}
             this.move();
             this.refreshGroup()
         }
