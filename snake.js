@@ -1,5 +1,3 @@
-const SNAKE_MOVE_DELAY = 1000; // milis
-
 const states = {
     ALIVE: "ALIVE",
     DEAD: "DEAD"
@@ -7,6 +5,8 @@ const states = {
 
 class Snake {
     constructor(x,y,z, length=3) {
+        this.score = 0;
+        this.moveDelay = 1000;
         this.state = states.ALIVE
         this.direction = new THREE.Vector3( 1, 0, 0 );
         this.normal = new THREE.Vector3(0, 1, 0);
@@ -15,10 +15,10 @@ class Snake {
         this.body.push({ x, y, z })
         this.lastUpdate = new Date().getTime();
         this.group = new THREE.Object3D();
+        this.spawnFood();
         this.refreshGroup();
         this.length = length;
         this.queueRotationFunction = () => {}
-
     }
     getHead() {
         return this.body[this.body.length-1]
@@ -105,11 +105,19 @@ class Snake {
     }
     update() {
         const now = new Date().getTime() 
-        if (now - this.lastUpdate >= SNAKE_MOVE_DELAY) {
+        if (now - this.lastUpdate >= this.moveDelay) {
             this.lastUpdate = now
             this.queueRotationFunction()
             this.queueRotationFunction = () => {}
             this.move();
+            const head = this.getHead()
+            const food = this.food
+            if (head.x === food.x && head.y===food.y && head.z===food.z) {
+                this.score += 1;
+                this.length += 1;
+                this.moveDelay = Math.max(this.moveDelay-50, 200);
+                this.spawnFood();
+            }
             this.refreshGroup()
         }
     }
@@ -124,6 +132,9 @@ class Snake {
             const bodyPart = this.makeBodyPart(x, y, z)
             this.group.add(bodyPart)
         }
+        const food = this.makeFood(this.food.x, this.food.y, this.food.z);
+        this.group.add(food);
+
         const direction = new THREE.ArrowHelper( this.direction, this.getHead(), 2, 0xFF0000);
         const normal = new THREE.ArrowHelper( this.normal, this.getHead(), 2, 0x00FF00);
         const leftRight = new THREE.ArrowHelper( this.leftRight, this.getHead(), 2, 0x0000FF);
@@ -139,5 +150,33 @@ class Snake {
         const mesh = new THREE.Mesh(geometry, material);
         mesh.position.set(x,y,z);
         return mesh
+    }
+    makeFood(x,y,z) {
+        const color = 0xFFFF00;
+        const geometry = new THREE.BoxGeometry(1, 1, 1);
+        const material = new THREE.MeshBasicMaterial({ color: color, transparent: true, opacity: 0.5});
+        const mesh = new THREE.Mesh(geometry, material);
+        mesh.position.set(x,y,z);
+        return mesh
+    }
+
+    spawnFood() {
+        const validPositions = [];
+        for (let i = -offset_x; i< GRID_DIMENSIONS.x-offset_x; i++) {
+            for (let j = -offset_y; j<GRID_DIMENSIONS.y-offset_y; j++) {
+                for (let k = -offset_z; k<GRID_DIMENSIONS.z-offset_z; k++) {
+                    const pos = { x: i, y: j, z: k};
+                    if (this.body.filter(part => part.x === pos.x && part.y == pos.y && part.z == pos.z).length == 0) {
+                        validPositions.push(pos);
+                    }
+                }
+            }
+        }
+        if (validPositions.length == 0) {
+            console.log("GG!");
+        }
+        const randomPosition = validPositions[Math.floor(Math.random() * validPositions.length)]
+        this.food = randomPosition
+        console.log(validPositions)
     }
 }
