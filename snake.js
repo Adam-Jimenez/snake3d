@@ -177,6 +177,5 @@ class Snake {
         }
         const randomPosition = validPositions[Math.floor(Math.random() * validPositions.length)]
         this.food = randomPosition
-        console.log(validPositions)
     }
 }

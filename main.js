@@ -46,7 +46,7 @@ camera.lookAt(0,0,0);
 
 const rotateAxis = new THREE.Vector3(0, 1, 0);
 const rotationMatrix = new THREE.Matrix4();
-rotationMatrix.makeRotationY(Math.PI/512)
+rotationMatrix.makeRotationY(Math.PI/1024)
 
 const snake = new Snake(0,0,0, 5);
 snake.registerKeybindings();
@@ -54,11 +54,23 @@ scene.add(snake.group)
 
 // game logic
 var update = function() {
-    const head = snake.getHead()
     camera.position.applyMatrix4(rotationMatrix);
-    camera.lookAt(head.x, head.y, head.z);
+    smoothFollow();
+    // camera.lookAt(head.x, head.y, head.z);
     snake.update();
 };
+
+function smoothFollow() {
+    const qat = camera.quaternion;
+    const eye = camera.position;
+    const head = snake.getHead()
+    const center = new THREE.Vector3(head.x, head.y, head.z)
+    const m = new THREE.Matrix4();
+    m.lookAt(eye, center, new THREE.Vector3(0,1,0))
+    const qat2 = new THREE.Quaternion()
+    qat2.setFromRotationMatrix(m);
+    camera.quaternion.slerp(qat2, 0.04)
+}
 
 // draw scene
 var render = function() {
@@ -71,6 +83,8 @@ var GameLoop = function() {
     render();
     if (snake.state == "ALIVE") {
         requestAnimationFrame(GameLoop);
+    } else {
+        alert(`Score: ${snake.score}`)
     }
 };
 
